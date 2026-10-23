@@ -1,0 +1,31 @@
+# Dependencias (en cualquier paquete)
+**/node_modules/
+
+# Salidas generadas
+**/dist/
+**/build/
+**/.next/
+**/coverage/
+**/reports/
+**/.vercel/
+
+# Estado local de herramientas
+.atl/
+.vscode/
+.idea/
+*.code-workspace
+.DS_Store
+Thumbs.db
+
+# Variables locales y secretos
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Estado temporal de Supabase
+**/supabase/.temp/
+**/supabase/.branches/
+
+# Se versionan deliberadamente lockfiles, documentación, SQL, migraciones,
+# configuración de Supabase y semillas sintéticas. No ignorar .pi/ completo.

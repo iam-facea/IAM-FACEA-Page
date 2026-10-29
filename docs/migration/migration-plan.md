@@ -170,16 +170,17 @@ El detalle normativo está en el [contrato aprobado de publicaciones MVP](./mvp-
 - [x] Crear y aplicar 22 migraciones y un seed sintético para las dos tablas aprobadas y RPCs de Edge.
 - [x] Implementar grants, políticas RLS, subject editor exacto con default `NULL` y borrado lógico protegido.
 - [x] Crear y ejecutar pruebas de base positivas y negativas con fixtures sintéticos transaccionales.
-- [ ] Revisar y endurecer configuración de servicio para un entorno que no sea el desarrollo local generado.
+- [x] Revisar y endurecer configuración de servicio para un entorno que no sea el desarrollo local generado (Supabase Cloud).
 - [x] Implementar las funciones Edge de publicaciones (Issue #5).
 - [x] Implementar contrato de almacenamiento, adaptadores Memory/Blob y función Edge `images` con tests (Issue #4).
-- [ ] Configurar Supabase Auth, provisión administrativa de una identidad real y flujo de recuperación.
+- [x] Configurar Supabase Auth, provisión administrativa de una identidad real y flujo de recuperación.
 - [ ] Integrar Vercel Blob después de verificar términos, disponibilidad, permisos y SDK vigentes en producción.
 - [x] Crear y ejecutar pruebas de Deno para la función Edge de imágenes y sus adaptadores.
 - [x] Crear y ejecutar pruebas de las funciones Edge de publicaciones (#5).
-- [ ] Verificar despliegue y diferencias respecto del legacy; actualizar `migration-status.md` con evidencia.
+- [x] Desplegar backend y Edge Functions en Supabase Cloud y verificar endpoints en vivo.
+- [x] Verificar despliegue y diferencias respecto del legacy; actualizar `migration-status.md` con evidencia.
 
-**Estado actual:** la base local tiene esquema, seed, grants, RLS y pruebas verificadas. La configuración editora permanece en `NULL` y no hay usuarios reales en `auth.users`. No existen funciones Edge, contrato HTTP probado, Auth provisionado, integración de almacenamiento, frontend, vínculo Cloud ni despliegue. Por esas brechas, la Etapa 5 continúa pendiente. El alcance técnico de BD del issue #3 está implementado y verificado localmente; su entrega y cierre administrativo siguen pendientes de autorización para commits, PR e integración. Las funciones Edge y el almacenamiento corresponden a las unidades posteriores (#5 y #4), no son condiciones para completar técnicamente el issue #3.
+**Estado actual:** la capacidad de backend del MVP de publicaciones está completamente implementada, probada y desplegada en Supabase Cloud (`cpeeairlzggsxbhurdas`). Cuenta con 22 migraciones aplicadas, tablas `content` y `publication`, triggers de seguridad, RLS, funciones RPC, y las 3 Edge Functions (`publications`, `editor-publications`, `images`) respondiendo en vivo. La identidad editora real fue aprovisionada administrativamente (`cee551c9-bb24-4fdb-9155-7dd0b4bd41ad`), el registro abierto fue deshabilitado y `get_editor_subject()` resuelve el UUID exacto. Resta configurar el token de servidor de Vercel Blob para cargas de imágenes productivas y avanzar hacia el desarrollo del frontend (Etapas 6 y 7).
 
 **Criterio de diseño:** el legacy es evidencia histórica; el esquema y contrato nuevos no copian su arquitectura, ids, rutas, almacenamiento ni autorización.
 
@@ -266,6 +267,7 @@ El baseline público conocido continúa siendo `a13911eaf10b59a0e3587d0f44fa4ee7
 | Etapa 5 — base de publicaciones local | Reconstrucción de 22 migraciones, seed de tres publicaciones, 5 archivos/52 pruebas y lint sin hallazgos | Issue #3 y [guía de Supabase](../../supabase/README.md) |
 | Etapa 5 — almacenamiento y función images | StorageAdapter desacoplado, adaptadores Memory/Blob, validador de imágenes y Edge Function images con 46 tests Deno | Issue #4 y [guía de Supabase](../../supabase/README.md) |
 | Etapa 5 — Edge Functions de publicaciones | Funciones Edge publications y editor-publications implementando las 7 acciones de publicaciones con 110 tests Deno totales | Issue #5 y [guía de Supabase](../../supabase/README.md) |
+| Etapa 5 — Despliegue en Supabase Cloud | 22 migraciones, 3 Edge Functions en vivo, provisión de editor Auth y cierre de signup abierto | Proyecto `cpeeairlzggsxbhurdas`, smoke tests 200/401/404 y [guía de despliegue](../development/supabase-cloud-deployment.md) |
 | Traspaso documental | Plan activo y continuidad en el monorepo; cinco copias previas verificadas; workspace original reducido a un puntero | [handover](./handover.md) y [handoff para IA](./ai-handoff.md) |
 
 ## Etapa 10 — Refinar y consolidar documentación

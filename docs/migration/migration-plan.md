@@ -51,9 +51,9 @@ La estructura muestra el límite actual y los lugares previstos; no implica que 
     │   └── web/                               # Futuro; crear tras elegir frontend
     ├── supabase/
     │   ├── config.toml                        # Sólo local; excluida de la entrega actual
-    │   ├── migrations/                        # 20 migraciones locales de la base de publicaciones
+    │   ├── migrations/                        # 22 migraciones locales de la base de publicaciones
     │   ├── seed.sql                           # Tres fixtures sintéticos de desarrollo
-    │   ├── functions/                         # Futuro; funciones Edge no creadas
+    │   ├── functions/                         # Edge Functions (images implementada con tests)
     │   └── tests/                             # Cinco archivos pgTAP de base
     ├── docs/
     │   ├── product/                           # Futuro; tras validar requisitos
@@ -167,14 +167,16 @@ El detalle normativo está en el [contrato aprobado de publicaciones MVP](./mvp-
 ### Implementación por completar
 
 - [x] Iniciar los servicios locales con autorización y reconstruir la base desde cero.
-- [x] Crear y aplicar 21 migraciones y un seed sintético para las dos tablas aprobadas.
+- [x] Crear y aplicar 22 migraciones y un seed sintético para las dos tablas aprobadas y RPCs de Edge.
 - [x] Implementar grants, políticas RLS, subject editor exacto con default `NULL` y borrado lógico protegido.
 - [x] Crear y ejecutar pruebas de base positivas y negativas con fixtures sintéticos transaccionales.
 - [ ] Revisar y endurecer configuración de servicio para un entorno que no sea el desarrollo local generado.
-- [ ] Implementar las tres funciones Edge y sus módulos funcionales.
+- [ ] Implementar las funciones Edge de publicaciones (Issue #5).
+- [x] Implementar contrato de almacenamiento, adaptadores Memory/Blob y función Edge `images` con tests (Issue #4).
 - [ ] Configurar Supabase Auth, provisión administrativa de una identidad real y flujo de recuperación.
-- [ ] Integrar Vercel Blob después de verificar términos, disponibilidad, permisos y SDK vigentes.
-- [ ] Crear y ejecutar pruebas del contrato HTTP, funciones Edge y adaptador de almacenamiento.
+- [ ] Integrar Vercel Blob después de verificar términos, disponibilidad, permisos y SDK vigentes en producción.
+- [x] Crear y ejecutar pruebas de Deno para la función Edge de imágenes y sus adaptadores.
+- [ ] Crear y ejecutar pruebas de las funciones Edge de publicaciones restantes (#5).
 - [ ] Verificar despliegue y diferencias respecto del legacy; actualizar `migration-status.md` con evidencia.
 
 **Estado actual:** la base local tiene esquema, seed, grants, RLS y pruebas verificadas. La configuración editora permanece en `NULL` y no hay usuarios reales en `auth.users`. No existen funciones Edge, contrato HTTP probado, Auth provisionado, integración de almacenamiento, frontend, vínculo Cloud ni despliegue. Por esas brechas, la Etapa 5 continúa pendiente. El alcance técnico de BD del issue #3 está implementado y verificado localmente; su entrega y cierre administrativo siguen pendientes de autorización para commits, PR e integración. Las funciones Edge y el almacenamiento corresponden a las unidades posteriores (#5 y #4), no son condiciones para completar técnicamente el issue #3.
@@ -261,7 +263,8 @@ El baseline público conocido continúa siendo `a13911eaf10b59a0e3587d0f44fa4ee7
 | Etapa 2 — publicación | Primer commit y push autorizados y realizados; `main` local/remota coincidieron en ese momento | `a13911eaf10b59a0e3587d0f44fa4ee75c870109`; `github.com/iam-facea/IAM-FACEA-Page` |
 | Etapas 3 y 4 — preparación local | Archivo documental y guía legacy verificados; raw excluido de publicación | `docs/migration/work-history/archive-migration-context.md` y `docs/migration/work-history/formalize-legacy-references.md` (locales) |
 | Etapa 5 — configuración local histórica | `supabase init` completado sin iniciar runtime ni crear esquema en aquella sesión | `docs/migration/work-history/initialize-supabase-local-config.md` (local) |
-| Etapa 5 — base de publicaciones local | Reconstrucción de 21 migraciones, seed de tres publicaciones, 5 archivos/52 pruebas y lint sin hallazgos; cambios aún sin commit | Issue #3 y [guía de Supabase](../../supabase/README.md) |
+| Etapa 5 — base de publicaciones local | Reconstrucción de 22 migraciones, seed de tres publicaciones, 5 archivos/52 pruebas y lint sin hallazgos | Issue #3 y [guía de Supabase](../../supabase/README.md) |
+| Etapa 5 — almacenamiento y función images | StorageAdapter desacoplado, adaptadores Memory/Blob, validador de imágenes y Edge Function images con 46 tests Deno | Issue #4 y [guía de Supabase](../../supabase/README.md) |
 | Traspaso documental | Plan activo y continuidad en el monorepo; cinco copias previas verificadas; workspace original reducido a un puntero | [handover](./handover.md) y [handoff para IA](./ai-handoff.md) |
 
 ## Etapa 10 — Refinar y consolidar documentación

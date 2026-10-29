@@ -1,6 +1,6 @@
 # Supabase local database operations
 
-The local database currently has 21 ordered migrations for the publication schema, access controls, and soft deletion. `supabase/seed.sql` adds three synthetic development fixtures after a local reconstruction. No Edge Functions, Blob integration, real editor identity, email provisioning, signup, or recovery flow is implemented.
+The local database currently has 22 ordered migrations for the publication schema, access controls, soft deletion, and Edge Function service-role RPCs. `supabase/seed.sql` adds three synthetic development fixtures after a local reconstruction. The `images` Edge Function is implemented locally and tested against the database schema and storage adapters. No real editor identity, email provisioning, signup, or recovery flow is implemented.
 
 ## Rebuild the local database
 
@@ -12,7 +12,7 @@ From the repository root, run the reset only after explicitly authorizing local 
 supabase db reset --local
 ```
 
-A reset applies the 21-migration chain in order and then applies `supabase/seed.sql`. The seed is idempotent for its fixed identifiers and contains only `.example.invalid` URLs and clearly synthetic UUIDs. It creates one published publication, one draft, and one soft-deleted publication. The deleted fixture and its referenced content remain stored; the seed invokes the existing soft-delete trigger and never physically purges them.
+A reset applies the 22-migration chain in order and then applies `supabase/seed.sql`. The seed is idempotent for its fixed identifiers and contains only `.example.invalid` URLs and clearly synthetic UUIDs. It creates one published publication, one draft, and one soft-deleted publication. The deleted fixture and its referenced content remain stored; the seed invokes the existing soft-delete trigger and never physically purges them.
 
 The local `supabase/config.toml` remains ignored and unmodified. Its generated Auth defaults are local development defaults, not a hardened production configuration.
 
@@ -73,11 +73,30 @@ COMMIT;
 
 This update configures one exact subject only. It does not create an Auth user, email flow, role hierarchy, or recovery mechanism.
 
+## Edge Functions and image storage
+
+The repository includes the `images` Edge Function (`POST /functions/v1/images`), image validation rules, and decoupled storage adapters under `supabase/functions/`:
+
+- `_shared/storage.ts`: `StorageAdapter` interface (`store` and `delete`).
+- `_shared/memory_storage_adapter.ts`: deterministic in-memory storage adapter for zero-network testing.
+- `_shared/vercel_blob_storage_adapter.ts`: production server-side Vercel Blob adapter using `BLOB_READ_WRITE_TOKEN`.
+- `_shared/image_validator.ts`: validates multipart images by inspecting magic bytes (JPEG `FF D8 FF`, PNG `89 50 4E 47`, WebP `RIFF...WEBP`), enforcing a strict 5 MiB size limit, and parsing image headers to enforce maximum 4096×4096 dimensions.
+- `images/handler.ts` & `images/index.ts`: HTTP handler enforcing exact editor session authorization, multipart format, storage upload, insertion into `public.content`, and compensatory storage deletion on database failure.
+
+### Run Edge Function tests
+
+Run the Deno test suite using the verified containerized runtime:
+
+```sh
+MSYS_NO_PATHCONV=1 docker run --rm -v "C:/000 MIS COSAS NUEVAS/00 REPOS/iam-facea-workspace/iam-facea-page:/app" -w /app denoland/deno:2.1.4 deno test supabase/functions/
+```
+
 ## Current limits
 
 - The database schema, RLS, grants, bounded public read function, soft-delete gate, tests, and local synthetic seed exist.
-- The three approved Edge Function endpoints are not implemented.
-- Vercel Blob is not integrated, and no paid or free quota is assumed known.
+- The `images` Edge Function and storage adapters are implemented and verified via unit and HTTP integration tests.
+- The two publication Edge Functions (`publications` and `editor-publications`) remain pending for Issue #5.
+- Vercel Blob production credentials remain unconfigured; production uses the verified server adapter once provisioned.
 - These instructions neither link nor operate a Supabase Cloud project.
 - No real editor identity, secret, privileged client key, or `auth.users` seed account is included.
 - Any future privileged database or Blob credential remains server-only and must never be exposed through client-prefixed environment variables.

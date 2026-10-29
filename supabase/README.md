@@ -102,11 +102,22 @@ Run the Deno test suite using the verified containerized runtime:
 MSYS_NO_PATHCONV=1 docker run --rm -v "C:/000 MIS COSAS NUEVAS/00 REPOS/iam-facea-workspace/iam-facea-page:/app" -w /app denoland/deno:2.1.4 deno test supabase/functions/
 ```
 
+## Verified Supabase Cloud deployment
+
+The backend is deployed and operational in Supabase Cloud under project reference `cpeeairlzggsxbhurdas` (`sa-east-1`):
+
+- **Database:** 22 ordered migrations applied; tables `public.content` and `public.publication` created with RLS and constraints.
+- **RPCs:** `read_publications` and `get_editor_subject` installed.
+- **Edge Functions:** all 3 functions deployed with `--no-verify-jwt`:
+  - `https://cpeeairlzggsxbhurdas.supabase.co/functions/v1/publications` (public list/detail).
+  - `https://cpeeairlzggsxbhurdas.supabase.co/functions/v1/editor-publications` (editorial operations).
+  - `https://cpeeairlzggsxbhurdas.supabase.co/functions/v1/images` (image upload and storage).
+- **Authentication & Authorization:** real editor user provisioned administratively (`cee551c9-bb24-4fdb-9155-7dd0b4bd41ad`), open signup disabled in Auth providers, and `app_private.editor_configuration` configured to that subject.
+- **Deployment Guide:** see detailed instructions in `docs/development/supabase-cloud-deployment.md`.
+
 ## Current limits
 
 - The database schema, RLS, grants, bounded public read function, soft-delete gate, tests, and local synthetic seed exist.
-- All three approved Edge Functions (`publications`, `editor-publications`, `images`) covering the 8 actions are implemented and verified via unit and HTTP integration tests.
-- Vercel Blob production credentials remain unconfigured; production uses the verified server adapter once provisioned.
-- These instructions neither link nor operate a Supabase Cloud project.
-- No real editor identity, secret, privileged client key, or `auth.users` seed account is included.
-- Any future privileged database or Blob credential remains server-only and must never be exposed through client-prefixed environment variables.
+- All three approved Edge Functions (`publications`, `editor-publications`, `images`) covering the 8 actions are implemented, verified with 110 Deno tests and deployed to Supabase Cloud.
+- Vercel Blob production credentials (`BLOB_READ_WRITE_TOKEN`) remain to be configured as a secret in Cloud once provisioned; production image upload uses the verified server adapter.
+- No secrets or privileged service_role keys are committed to the repository or exposed to client channels.

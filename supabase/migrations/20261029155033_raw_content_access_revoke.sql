@@ -1,0 +1,3 @@
+REVOKE SELECT
+ON TABLE public.content
+FROM PUBLIC, anon;

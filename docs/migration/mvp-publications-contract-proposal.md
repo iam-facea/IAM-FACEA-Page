@@ -1,8 +1,8 @@
 # Contrato aprobado de publicaciones MVP
 
-> **DISEÑO DE PRODUCTO APROBADO — NO IMPLEMENTADO.** Este documento define el contrato HTTP, el modelo de datos y los límites de seguridad aceptados para la primera capacidad. No prueba que existan tablas, migraciones, funciones Edge, políticas RLS, Supabase Auth, Vercel Blob, servicios iniciados, pruebas, integración real ni despliegue.
+> **DISEÑO DE PRODUCTO APROBADO — IMPLEMENTACIÓN LOCAL PARCIAL.** Este documento define el contrato HTTP, el modelo de datos y los límites de seguridad aceptados para la primera capacidad. La base local ya implementa y verifica tablas, migraciones, seed, grants, RLS, borrado lógico y pruebas SQL; no prueba que existan funciones Edge, Supabase Auth provisionado, Vercel Blob, contrato HTTP probado, integración real ni despliegue.
 
-> La aprobación es documental. Implementar, configurar servicios, usar credenciales, desplegar o publicar código requiere un alcance posterior y evidencia propia.
+> La aprobación del diseño no autoriza trabajo adicional. Configurar una identidad real, implementar las fronteras HTTP o Blob, usar credenciales, desplegar o publicar código requiere un alcance posterior y evidencia propia.
 
 ## 1. Alcance, procedencia y ruta de revisión
 
@@ -35,7 +35,7 @@ Las funciones públicas y editoriales dependen de PostgreSQL y RLS. La función 
 
 ### Fuera del alcance
 
-- implementación, runtime, migraciones, seeds, SQL ejecutado, políticas RLS aplicadas, funciones desplegadas o integración con proveedores;
+- funciones Edge, runtime HTTP, identidad Auth real, integración con proveedores, Cloud o despliegue; la implementación SQL local se registra por separado y no amplía este diseño;
 - frontend, búsqueda, filtros por categoría, programación, vistas de base de datos, contador de vistas, auditoría completa, versionado o roles múltiples;
 - papelera, restauración, recuperación administrativa o purga física de publicaciones;
 - un gateway o servidor propio bajo `/api/v1`;
@@ -358,9 +358,9 @@ Content-Type: image/webp
 
 Se validan strings, ids, fechas, estado, cursor, límites, autorización y archivo. Este contrato fija respuestas exitosas; un catálogo exhaustivo de errores puede definirse al implementar sin ampliar las ocho acciones ni debilitar autorización.
 
-## 8. Esquema PostgreSQL aprobado, todavía no aplicado
+## 8. Esquema PostgreSQL aprobado e implementado localmente
 
-> No existe migración ni SQL aplicado. Las tablas, constraints e índices siguientes son diseño aprobado; no describen una base actual.
+> La cadena local de 21 migraciones implementa estas dos tablas, constraints e índices y fue reconstruida desde cero con seed sintético. Esto describe una base local verificada, no Supabase Cloud ni un despliegue de producto. La historia aplicada conserva una vista temporal de desarrollo en una migración temprana, pero la migración final `20261029161826` la elimina; el esquema final no contiene vistas.
 
 Supabase Auth conserva identidades fuera de estas tablas. No se agrega una tabla local de usuarios o roles.
 
@@ -459,17 +459,17 @@ Las imágenes del MVP usan URLs públicas. RLS protege filas y operaciones, pero
 - Ocultar controles en frontend y configurar CORS no constituyen autorización.
 - Una clave privilegiada, si una implementación futura la requiere y justifica, permanece exclusivamente del lado servidor y nunca se expone con prefijos públicos.
 
-No hay políticas, grants, funciones, subjects, credenciales ni recuperación configurados actualmente. La implementación deberá probar accesos positivos y negativos mediante RLS y la frontera HTTP; no alcanza con validar un JWT.
+La base local tiene políticas, grants, `read_publications`, borrado lógico protegido y configuración privada para un subject exacto. Ese singleton conserva `editor_subject = NULL`: no hay identidad real provisionada, credenciales ni recuperación, y el acceso editorial falla cerrado. Las pruebas SQL positivas y negativas usan subjects sintéticos transaccionales con rollback. Todavía deben probarse la frontera HTTP y los servicios Auth reales; no alcanza con validar un JWT.
 
 ## 11. Límites de implementación y decisiones futuras
 
 Las decisiones de producto y arquitectura de este contrato están cerradas para el MVP. Siguen pendientes de trabajo, no de aprobación retroactiva:
 
-1. escribir y revisar migraciones, seeds sintéticos, RLS y las tres funciones Edge;
+1. implementar y revisar las tres funciones Edge sin convertir `read_publications` en una novena acción;
 2. definir el catálogo concreto de errores sin cambiar las ocho acciones exitosas;
-3. provisionar de forma segura la identidad editora y configurar el flujo de recuperación;
+3. provisionar de forma segura la identidad editora y configurar signup y recuperación según el contrato;
 4. verificar términos comerciales, disponibilidad, permisos y SDK vigente de Vercel Blob antes de integrar;
-5. comprobar con integración real que las URLs públicas y las operaciones del proveedor se comportan como exige el contrato;
+5. comprobar con pruebas HTTP e integración real que Auth, las URLs públicas y las operaciones del proveedor se comportan como exige el contrato;
 6. decidir sólo si aparece una necesidad demostrada cómo observar y limpiar contenido verdaderamente huérfano;
 7. tratar recuperación administrativa, papelera y purga física como capacidades futuras fuera del MVP;
 8. elegir la tecnología y el recorrido del frontend en las etapas posteriores del plan.
@@ -491,13 +491,19 @@ La base desplegada legacy permanece sin verificar y no condiciona estas decision
 - [x] Vercel Blob inicial, URLs públicas y adaptador genuino de almacenamiento.
 - [x] Exclusión intencional de vistas de base de datos, contador de vistas y enlace independiente de publicación.
 
+### Implementación verificada de base local
+
+- [x] Servicios locales usados para reconstruir la base desde cero con 21 migraciones.
+- [x] Seed sintético aplicado con una publicación pública, una draft y una eliminada lógicamente.
+- [x] Tablas, constraints, índices, grants, RLS y autorización por subject exacto implementados.
+- [x] Cinco archivos y 52 pruebas de base aprobados; lint local sin errores ni advertencias.
+
 ### Implementación todavía pendiente
 
-- [ ] Servicios locales iniciados y configuración de desarrollo revisada.
-- [ ] Migraciones y seeds creados y aplicados.
-- [ ] RLS, Auth y tres funciones Edge implementados.
+- [ ] Identidad editora real provisionada y configuración Auth endurecida, incluido signup y recuperación.
+- [ ] Tres funciones Edge y las ocho operaciones HTTP implementadas y probadas.
 - [ ] Integración con Vercel Blob verificada con términos y SDK vigentes.
-- [ ] Pruebas positivas, negativas y de integración ejecutadas.
-- [ ] Despliegue real verificado.
+- [ ] Pruebas HTTP, Edge, Blob y de integración real ejecutadas.
+- [ ] Frontend, vínculo Cloud y despliegue real verificados.
 
-Este documento puede publicarse como contrato de diseño aprobado. No debe presentarse como capacidad existente, configuración aplicada, proveedor verificado, prueba ejecutada ni autorización para comenzar implementación.
+Este documento sigue siendo el contrato de diseño aprobado. Puede citar la implementación local de base verificada, pero no debe presentarla como API existente, Auth configurado, proveedor integrado, capacidad desplegada ni autorización para continuar o publicar.

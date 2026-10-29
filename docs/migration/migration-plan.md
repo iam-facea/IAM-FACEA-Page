@@ -17,7 +17,7 @@ El traspaso documental sólo termina la preparación organizativa de la sesión 
 | Conservar el workspace original durante la transición | Recomendado; el cambio de punto de trabajo lo realiza la persona usuaria después del traspaso |
 | Mantener el backend C# fuera del monorepo como referencia | Recomendado; consultar mediante la [guía fijada](./legacy-reference.md) |
 | Construir el frontend definitivo desde cero | Decidido; la tecnología sigue pendiente |
-| Primera capacidad: publicaciones MVP | Diseño aprobado: CRUD, dos tablas, ocho operaciones, tres funciones Edge, Auth de una identidad y Vercel Blob; implementación pendiente |
+| Primera capacidad: publicaciones MVP | Diseño aprobado; base local implementada y verificada, mientras funciones Edge, Auth real, Blob, HTTP y despliegue siguen pendientes |
 | Elegir Vite, Next.js u otra tecnología adecuada | Pendiente; no bloquea el contrato backend aprobado |
 | Realizar un puente temporal de aprendizaje | Opcional; sólo si aporta evidencia útil antes del frontend definitivo |
 
@@ -51,10 +51,10 @@ La estructura muestra el límite actual y los lugares previstos; no implica que 
     │   └── web/                               # Futuro; crear tras elegir frontend
     ├── supabase/
     │   ├── config.toml                        # Sólo local; excluida de la entrega actual
-    │   ├── migrations/                        # Futuro; no creada
-    │   ├── seed.sql                           # Futuro; no creado
-    │   ├── functions/                         # Futuro; no creada
-    │   └── tests/                             # Futuro; no creada
+    │   ├── migrations/                        # 20 migraciones locales de la base de publicaciones
+    │   ├── seed.sql                           # Tres fixtures sintéticos de desarrollo
+    │   ├── functions/                         # Futuro; funciones Edge no creadas
+    │   └── tests/                             # Cinco archivos pgTAP de base
     ├── docs/
     │   ├── product/                           # Futuro; tras validar requisitos
     │   ├── architecture/
@@ -148,7 +148,7 @@ Este registro es histórico y no reemplaza una nueva comprobación:
 
 ## Etapa 5 — Preparar Supabase y migrar publicaciones MVP
 
-La disponibilidad previa de Supabase CLI 2.122.0 y Docker, y la ejecución histórica de `supabase init`, son antecedentes de otra sesión; no son checks actuales. La configuración generada permanece local, no se inició `supabase start` y `supabase/config.toml` se excluye de esta entrega documental.
+La disponibilidad previa de Supabase CLI 2.122.0 y Docker, y la ejecución de `supabase init`, son antecedentes históricos. En el cierre local del issue #3 se observaron la misma CLI y los servicios locales en ejecución; una reconstrucción desde cero aplicó las 20 migraciones y el seed. `supabase/config.toml` permaneció ignorado, conservó el hash `5b6b9cd73093e7f66aadfbc7c996b825ffb4ad98` y no recibió hardening de servicio.
 
 ### Diseño aprobado
 
@@ -164,18 +164,20 @@ La disponibilidad previa de Supabase CLI 2.122.0 y Docker, y la ejecución hist�
 
 El detalle normativo está en el [contrato aprobado de publicaciones MVP](./mvp-publications-contract-proposal.md). Estas marcas prueban decisiones documentales, no implementación.
 
-### Implementación pendiente
+### Implementación por completar
 
-- [ ] Revisar la configuración de desarrollo, obtener autorización e iniciar servicios locales.
-- [ ] Crear y aplicar migraciones y seeds sintéticos para las dos tablas aprobadas.
-- [ ] Implementar grants, políticas RLS y autorización del subject editor exacto.
+- [x] Iniciar los servicios locales con autorización y reconstruir la base desde cero.
+- [x] Crear y aplicar 21 migraciones y un seed sintético para las dos tablas aprobadas.
+- [x] Implementar grants, políticas RLS, subject editor exacto con default `NULL` y borrado lógico protegido.
+- [x] Crear y ejecutar pruebas de base positivas y negativas con fixtures sintéticos transaccionales.
+- [ ] Revisar y endurecer configuración de servicio para un entorno que no sea el desarrollo local generado.
 - [ ] Implementar las tres funciones Edge y sus módulos funcionales.
-- [ ] Configurar Supabase Auth, provisión administrativa y flujo de recuperación.
+- [ ] Configurar Supabase Auth, provisión administrativa de una identidad real y flujo de recuperación.
 - [ ] Integrar Vercel Blob después de verificar términos, disponibilidad, permisos y SDK vigentes.
-- [ ] Crear y ejecutar pruebas positivas, negativas y de integración real, incluido el adaptador local/fake.
+- [ ] Crear y ejecutar pruebas del contrato HTTP, funciones Edge y adaptador de almacenamiento.
 - [ ] Verificar despliegue y diferencias respecto del legacy; actualizar `migration-status.md` con evidencia.
 
-**Estado actual:** sólo el diseño está aprobado. No existen servicios iniciados, migraciones, seeds, tablas, políticas, funciones, Auth editorial, integración de almacenamiento, pruebas ejecutadas ni despliegue.
+**Estado actual:** la base local tiene esquema, seed, grants, RLS y pruebas verificadas. La configuración editora permanece en `NULL` y no hay usuarios reales en `auth.users`. No existen funciones Edge, contrato HTTP probado, Auth provisionado, integración de almacenamiento, frontend, vínculo Cloud ni despliegue. Por esas brechas, la Etapa 5 continúa pendiente. El alcance técnico de BD del issue #3 está implementado y verificado localmente; su entrega y cierre administrativo siguen pendientes de autorización para commits, PR e integración. Las funciones Edge y el almacenamiento corresponden a las unidades posteriores (#5 y #4), no son condiciones para completar técnicamente el issue #3.
 
 **Criterio de diseño:** el legacy es evidencia histórica; el esquema y contrato nuevos no copian su arquitectura, ids, rutas, almacenamiento ni autorización.
 
@@ -246,9 +248,9 @@ La cuarentena documental existente no queda habilitada para publicación por ele
 
 ## Próximo paso
 
-Las Etapas 3 y 4 conservan evidencia local y la Etapa 5 ya tiene diseño aprobado, pero ninguna implementación. El trabajo actual entrega documentación desde la excepción `docs/mvp-publications-contract` hacia `develop` y debe detenerse después, antes de iniciar servicios o crear esquema, Auth/RLS, funciones, almacenamiento o frontend.
+Las Etapas 3 y 4 conservan evidencia local y la Etapa 5 tiene su tramo de base implementado y verificado. El padre debe revisar el diff del issue #3 y decidir por separado cualquier commit o entrega. Después, las funciones Edge, Auth real, recuperación, Vercel Blob, pruebas HTTP, frontend y despliegue requieren nuevos alcances; no se deducen de la base local.
 
-El baseline público conocido continúa siendo `a13911eaf10b59a0e3587d0f44fa4ee75c870109`; no prueba el `HEAD` actual. La entrega documental tiene autorización, pero sus commits, push, issue, PR y merge no se afirman hasta observar evidencia. `main` queda intacta. La cuarentena histórica permanece ignorada y no está aprobada para publicación.
+El baseline público conocido continúa siendo `a13911eaf10b59a0e3587d0f44fa4ee75c870109`; no prueba el `HEAD` actual. La implementación está local y sin commit sobre `feat/db-publications-schema`, cuyo `HEAD` observado es `8d7c54b`. No hubo push, PR ni merge del issue #3 y no existe permiso de entrega pública. `main` queda intacta. La cuarentena histórica permanece ignorada y no está aprobada para publicación.
 
 ## Registro de avances
 
@@ -258,7 +260,8 @@ El baseline público conocido continúa siendo `a13911eaf10b59a0e3587d0f44fa4ee7
 | Etapa 2 — base local | Workspace y repositorio creados; documentación mínima, ignore y origin verificados | `docs/migration/work-history/bootstrap-monorepo.md` (local) |
 | Etapa 2 — publicación | Primer commit y push autorizados y realizados; `main` local/remota coincidieron en ese momento | `a13911eaf10b59a0e3587d0f44fa4ee75c870109`; `github.com/iam-facea/IAM-FACEA-Page` |
 | Etapas 3 y 4 — preparación local | Archivo documental y guía legacy verificados; raw excluido de publicación | `docs/migration/work-history/archive-migration-context.md` y `docs/migration/work-history/formalize-legacy-references.md` (locales) |
-| Etapa 5 — configuración local | `supabase init` completado sin iniciar runtime ni crear esquema | `docs/migration/work-history/initialize-supabase-local-config.md` (local) |
+| Etapa 5 — configuración local histórica | `supabase init` completado sin iniciar runtime ni crear esquema en aquella sesión | `docs/migration/work-history/initialize-supabase-local-config.md` (local) |
+| Etapa 5 — base de publicaciones local | Reconstrucción de 21 migraciones, seed de tres publicaciones, 5 archivos/52 pruebas y lint sin hallazgos; cambios aún sin commit | Issue #3 y [guía de Supabase](../../supabase/README.md) |
 | Traspaso documental | Plan activo y continuidad en el monorepo; cinco copias previas verificadas; workspace original reducido a un puntero | [handover](./handover.md) y [handoff para IA](./ai-handoff.md) |
 
 ## Etapa 10 — Refinar y consolidar documentación

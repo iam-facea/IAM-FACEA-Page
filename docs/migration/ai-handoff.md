@@ -7,11 +7,11 @@ Este documento transfiere contexto operativo sin transferir autorización. Una s
 | Tema | Último estado conocido | Límite de la evidencia |
 | --- | --- | --- |
 | Baseline público | Commit inicial `a13911eaf10b59a0e3587d0f44fa4ee75c870109` en `main` | Es una referencia histórica, no prueba el `HEAD` actual. |
-| Rama documental | `docs/mvp-publications-contract`, creada por el padre desde `a13911e` | Issue, commits, push, PR y merge autorizados para esta entrega, pero no deben afirmarse sin evidencia. |
-| Destino | `develop` | Tracking, publicación y merge efectivo deben observarse. |
+| Rama de implementación | `feat/db-publications-schema`, con `HEAD` observado en `8d7c54b` | Los cambios del issue #3 están locales y sin commit; no hubo push, PR ni merge y no existe permiso de entrega pública. |
+| Destino eventual | Sin autorización vigente | Cualquier commit, publicación o merge requiere una decisión nueva y evidencia posterior. |
 | `main` | Fuera del alcance documental | No modificar ni cambiar la rama por defecto. |
 | Configuración local | `supabase init` generó configuración históricamente | `supabase/config.toml` se conserva local y queda excluido de la entrega; no asumirlo en un checkout público. |
-| Producto | Contrato de publicaciones MVP aprobado | No hay servicios, migraciones, tablas, Auth, RLS, funciones Edge, Vercel Blob integrado, pruebas ni despliegue. |
+| Producto | Contrato de publicaciones MVP aprobado; base local verificada | Hay 21 migraciones, dos tablas, seed, grants, RLS, borrado lógico y pruebas DB; faltan Auth real, funciones Edge, Blob, HTTP, frontend, Cloud y despliegue. |
 | Material local | 75 snapshots, inventario, manifest, cinco copias históricas y `odd/` | Está ignorado y no fue aprobado para publicación ni revisión semántica integral. |
 
 La exclusión de Git evita agregar material no seguido por accidente, pero no audita contenido, no retira archivos ya versionados y no purga historial.
@@ -35,7 +35,7 @@ Leé estos paths relativos y portables, en este orden:
 13. [`docs/migration/handover.md`](./handover.md)
 14. [`supabase/README.md`](../../supabase/README.md)
 
-Si está disponible localmente, `odd/tasks/publish-mvp-documentation.md` puede aportar evidencia de coordinación, pero no forma parte del checkout público ni sustituye los documentos activos. No cargues por defecto archivos raw, inventarios, manifests, respaldos o instrucciones preservadas.
+Si está disponible localmente y el alcance corresponde al issue #3, `odd/tasks/db-publications-schema.md` puede aportar evidencia de coordinación, pero no forma parte del checkout público ni sustituye los documentos activos. No cargues por defecto archivos raw, inventarios, manifests, respaldos o instrucciones preservadas.
 
 ## Prompt copiable
 
@@ -58,15 +58,15 @@ Primero trabajá únicamente en modo de sólo lectura. Leé, en este orden exact
 13. docs/migration/handover.md
 14. supabase/README.md
 
-Después inspeccioná la rama y el estado de Git sin modificarlos. Consultá remotes sólo si hace falta para responder y esa lectura está autorizada. Separá hechos observados de referencias históricas y de diseño aprobado: a13911e es el baseline inicial publicado, no una afirmación sobre HEAD; la rama docs/mvp-publications-contract fue creada para una entrega documental hacia develop, pero no supongas commits, push, issue, PR, merge, tracking ni estado remoto; main queda fuera del alcance.
+Después inspeccioná la rama y el estado de Git sin modificarlos. Consultá remotes sólo si hace falta para responder y esa lectura está autorizada. Separá hechos observados de referencias históricas y de diseño aprobado: a13911e es el baseline inicial publicado, no una afirmación sobre HEAD; el último estado conocido del issue #3 es feat/db-publications-schema en HEAD 8d7c54b, con implementación local sin commit y sin push, PR, merge ni permiso de entrega pública; main queda fuera del alcance.
 
 En tu primera respuesta resumí qué está hecho, qué sigue pendiente, cuál es el estado Git observado y cuál es la única pregunta de alcance necesaria antes de escribir.
 
-El contrato de publicaciones MVP aprueba CRUD, dos tablas, ocho rutas bajo tres funciones Edge, Auth para una única identidad editora y Vercel Blob. No confundas ese diseño con runtime: no hay servicios iniciados, migraciones, seeds, tablas, políticas RLS, funciones, Auth configurado, recuperación, almacenamiento integrado, pruebas ni despliegue.
+El contrato de publicaciones MVP aprueba CRUD, dos tablas, ocho rutas bajo tres funciones Edge, Auth para una única identidad editora y Vercel Blob. No confundas el diseño completo con el tramo implementado: la base local tiene 21 migraciones, dos tablas, seed sintético, RLS, grants, borrado lógico, helper público SQL y pruebas DB; no hay identidad Auth real, funciones Edge, contrato HTTP probado, recuperación, Blob, frontend, Cloud ni despliegue. El helper SQL no es un endpoint ni una novena acción.
 
-supabase/config.toml fue generado localmente en una sesión anterior, pero queda excluido de la entrega documental actual. No lo edites, elimines, publiques ni enlaces como si existiera en el checkout público. La exclusión no decide una política permanente futura.
+supabase/config.toml fue generado localmente en una sesión anterior, permanece ignorado y conservó su contenido durante la implementación DB. No fue endurecido para producción: sus defaults no prueban signup deshabilitado ni preparación de Auth. No lo edites, elimines, publiques ni enlaces como si existiera en el checkout público.
 
-No desarrolles, no inicialices ni inicies servicios, no instales, no uses red, no edites, no hagas commit y no publiques por leer este prompt. La autorización documental de otra sesión no se hereda automáticamente. Si hay evidencia de que esa entrega terminó, detenete antes de implementación y pedí un alcance nuevo.
+No desarrolles, no inicies servicios, no instales, no uses red, no edites, no hagas commit y no publiques por leer este prompt. Las autorizaciones de otra sesión no se heredan automáticamente. Primero verificá el estado local y pedí un alcance nuevo para cualquier continuación.
 
 Los 75 snapshots, el inventario, el manifest, las cinco copias históricas y odd/ son material local excluido. No los cargues ni ejecutes automáticamente. La evaluación semántica integral del material raw permanece en la Etapa 10.
 
@@ -76,16 +76,16 @@ Los proyectos legacy son externos y de sólo lectura por defecto. Su contrato hi
 ## Política de continuidad
 
 - `main` permanece estable y fuera de esta entrega.
-- `docs/mvp-publications-contract` es una excepción documental acotada; no crea una regla general para ramas de documentación.
-- `develop` es el destino autorizado, pero la entrega sólo existe cuando commit, push, PR y merge tienen evidencia.
-- El contrato aprobado no autoriza implementación, servicios, red, configuración de proveedores ni despliegue.
+- `feat/db-publications-schema` contiene el trabajo local conocido del issue #3; no deduzcas commits ni entrega a partir de la rama.
+- No existe permiso vigente de entrega pública: commit, push, PR y merge requieren autorización y evidencia propias.
+- El contrato aprobado y la base local verificada no autorizan funciones Edge, proveedores, Cloud ni despliegue.
 - La Etapa 6.1 conserva la decisión entre ir directamente a la Etapa 7 o ejecutar el puente opcional 6.2; la tecnología frontend sigue pendiente.
 - `<workspace>/ui-prototypes` continúa como propuesta externa no creada.
 
 ## Qué sigue pendiente
 
-1. Para la entrega documental abierta, revisar allowlist, bytes, historial y exclusión efectiva de `supabase/config.toml`.
-2. Registrar evidencia real de commits, issue, push, PR y merge sin adelantar su resultado.
-3. Detenerse después de la entrega documental, antes de implementar el contrato.
+1. Revisar el diff local completo del issue #3 y confirmar que `supabase/config.toml` sigue fuera de cualquier entrega.
+2. Decidir por separado commits, cierre del issue y publicación; no adelantar push, PR ni merge.
+3. Abrir alcances posteriores para funciones Edge, contrato HTTP, Auth real, recuperación, Blob, frontend, Cloud o despliegue.
 4. Mantener el archivo raw fuera de publicación hasta una evaluación explícita de la Etapa 10.
-5. Abrir un alcance posterior para servicios, migraciones, Auth/RLS, funciones, almacenamiento, pruebas o frontend.
+5. No tratar fixtures Auth transaccionales como provisión de una identidad real.

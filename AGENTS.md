@@ -1,6 +1,6 @@
 # Instrucciones para agentes
 
-Este repositorio todavía no tiene runtime de aplicación. Antes de proponer o editar, verificá qué existe realmente; no deduzcas herramientas, comandos, decisiones ni autorización a partir de la estructura futura.
+Este repositorio todavía no tiene runtime de aplicación ni frontend. La base local de publicaciones sí tiene una implementación verificada; antes de proponer o editar, comprobá qué existe realmente y separá ese estado actual de las observaciones históricas. No deduzcas herramientas, comandos, decisiones ni autorización a partir de la estructura futura.
 
 ## Lectura obligatoria
 
@@ -17,11 +17,11 @@ Leé y confirmá que pudiste cargar, en este orden:
 9. [Estado de migración](./docs/migration/migration-status.md): integridad y revisiones pendientes.
 10. [Referencias legacy](./docs/migration/legacy-reference.md): evidencia externa fijada.
 11. [Contrato histórico del backend legacy](./docs/migration/legacy-backend-contract.md): descripción aprobada de evidencia, no diseño nuevo.
-12. [Contrato aprobado de publicaciones MVP](./docs/migration/mvp-publications-contract-proposal.md): diseño vigente, todavía no implementado.
+12. [Contrato aprobado de publicaciones MVP](./docs/migration/mvp-publications-contract-proposal.md): diseño vigente y estado de su implementación local parcial.
 13. [Handover](./docs/migration/handover.md): raíz de reentrada, límites y próximos pasos autorizables.
-14. [Configuración local de Supabase](./supabase/README.md): historia de inicialización, sin runtime ni configuración pública incluida.
+14. [Operaciones locales de Supabase](./supabase/README.md): esquema, controles, seed, pruebas y límites verificados de la base local; la configuración local sigue excluida.
 
-Para una sesión nueva, usá además el [handoff para IA](./docs/migration/ai-handoff.md), que contiene un prompt copiable y este mismo orden. Si existe localmente, `odd/tasks/publish-mvp-documentation.md` aporta evidencia de la unidad actual, pero es opcional y no forma parte de la publicación.
+Para una sesión nueva, usá además el [handoff para IA](./docs/migration/ai-handoff.md), que contiene un prompt copiable y este mismo orden. Si existe localmente y el alcance corresponde al issue #3, `odd/tasks/db-publications-schema.md` aporta evidencia de la unidad actual, pero es opcional y no forma parte de la publicación.
 
 Si un archivo obligatorio falta o contradice otro, informalo antes de avanzar. No reemplaces esa verificación por supuestos ni inventes un runner de build o tests. Leer documentación no autoriza servicios, desarrollo, instalaciones, red, escrituras, commits ni publicación.
 
@@ -57,16 +57,16 @@ No supongas que una autorización de publicación anterior sigue vigente, que `d
 
 ## Ramas
 
-`main` es la rama estable y permanece fuera de esta entrega. `develop` es la rama de integración prevista, pero su estado remoto y cualquier merge deben verificarse, no suponerse. Como excepción documental autorizada para el alcance actual, existe `docs/mvp-publications-contract`, creada desde el baseline indicado por la persona usuaria para preparar un issue y un único PR hacia `develop`. La restricción anterior de no crear una rama documental correspondía al handoff previo; no invalida esta excepción concreta. No afirmes que hubo commits, push, PR o merge hasta observar su evidencia.
+`main` es la rama estable y permanece fuera de este cierre. `develop` es la rama de integración prevista, pero su estado remoto y cualquier merge deben verificarse, no suponerse. El último estado conocido del issue #3 es `feat/db-publications-schema` sobre `8d7c54b`, con cambios locales sin commit y sin permiso de entrega pública. No afirmes commit, push, PR, merge o cierre del issue hasta observar evidencia y autorización.
 
-Fuera de esta excepción, las ramas `feat/*`, `fix/*` o `task/*` se crean desde la base acordada sólo cuando comienza su trabajo y no por adelantado. Cambiar la rama por defecto o modificar `main` exige una decisión separada.
+Las ramas `feat/*`, `fix/*` o `task/*` se crean desde la base acordada sólo cuando comienza su trabajo y no por adelantado. Cambiar la rama por defecto o modificar `main` exige una decisión separada.
 
 ## Criterio técnico
 
 La autorización se aplica en el servidor y/o mediante RLS; ocultar controles en la interfaz no constituye autorización. Las migraciones compartidas deben conservar compatibilidad durante despliegues independientes y seguir un enfoque expand/contract.
 
-La configuración creada históricamente por `supabase init` no equivale a runtime iniciado ni a configuración endurecida para producción. `supabase/config.toml` permanece local y está excluido deliberadamente de la entrega documental actual; no asumas que existe en un checkout público ni enlaces documentación hacia ese archivo.
+La configuración creada históricamente por `supabase init` no equivalía a runtime iniciado ni a configuración endurecida para producción. Posteriormente, la implementación local de la base de publicaciones fue reconstruida y verificada con 20 migraciones, seed sintético, RLS, grants y pruebas de base. `supabase/config.toml` permanece local, ignorado y sin hardening de servicio; no asumas que existe en un checkout público ni enlaces documentación hacia ese archivo.
 
-El diseño de la primera capacidad ya está aprobado en el contrato de publicaciones MVP: esquema de dos tablas, ocho operaciones, tres funciones Edge, Auth para una única identidad editora, RLS y Vercel Blob como proveedor inicial. Nada de eso está implementado, configurado, probado ni desplegado. La autorización se aplica al subject exacto en servidor y RLS; validar sólo un JWT u ocultar controles en la interfaz no constituye autorización.
+El diseño de la primera capacidad está aprobado en el contrato de publicaciones MVP: esquema de dos tablas, ocho operaciones, tres funciones Edge, Auth para una única identidad editora, RLS y Vercel Blob como proveedor inicial. Sólo el tramo de base local está implementado y probado. No existen todavía funciones Edge, contrato HTTP probado, identidad real provisionada, flujo Auth, integración Blob, frontend, vínculo Cloud ni despliegue. La autorización de base compara el subject exacto y falla cerrada mientras la configuración editora permanezca en `NULL`; validar sólo un JWT u ocultar controles en la interfaz no constituye autorización.
 
 Documentá las verificaciones realmente ejecutadas. Si todavía no hay herramientas o runner, indicá que el control no aplica en vez de inventar un comando.

@@ -1,6 +1,6 @@
 # IAM FACEA
 
-Repositorio independiente para evolucionar el producto web de IAM FACEA sin alterar los proyectos legados. El baseline documental inicial publicado es `a13911eaf10b59a0e3587d0f44fa4ee75c870109`; ese identificador no demuestra el `HEAD` actual. La rama `develop` fue creada localmente desde ese baseline para preparar el traspaso, pero su commit y publicación todavía deben comprobarse. No hay aplicación, base de datos en ejecución, integración continua ni despliegue ejecutable.
+Repositorio independiente para evolucionar el producto web de IAM FACEA sin alterar los proyectos legados. El baseline documental inicial publicado es `a13911eaf10b59a0e3587d0f44fa4ee75c870109`; ese identificador no demuestra el `HEAD` actual. La rama `develop` fue creada localmente desde ese baseline para preparar el traspaso, pero su commit y publicación todavía deben comprobarse. No hay aplicación frontend, integración continua ni despliegue. Sí existe una implementación local verificada de la base de publicaciones; no equivale a un backend HTTP ni a una entrega pública.
 
 ## Empezar por acá
 
@@ -13,11 +13,11 @@ Leer estos documentos no autoriza desarrollar, iniciar servicios, instalar, usar
 ## Estado actual
 
 - `main` conserva como baseline publicado conocido el commit inicial `a13911e`; no se modificó en esta preparación.
-- La entrega documental actual se prepara en `docs/mvp-publications-contract`, una excepción autorizada para un único PR hacia `develop`. No se afirma que existan commits, push, PR, merge o `develop` remoto hasta observar su evidencia; `main` permanece fuera del alcance.
-- La revisión actual sólo prepara un mínimo de privacidad y seguridad para publicar documentación activa. No es una auditoría exhaustiva ni valida el archivo histórico de 119.057.926 bytes.
+- La implementación local del issue #3 está en `feat/db-publications-schema`, con `HEAD` observado en `8d7c54b` y cambios de Supabase todavía sin commit. No hubo push, PR ni merge del issue #3 y no existe permiso de entrega pública; `main` permanece fuera del alcance.
+- Este cierre actualiza sólo la documentación activa para reflejar la base local verificada. No autoriza publicación, no es una auditoría exhaustiva ni valida el archivo histórico de 119.057.926 bytes.
 - Los 75 snapshots, el inventario, el manifest, cinco copias históricas y los artefactos ODD permanecen locales e ignorados. Sus wrappers públicos conservan la procedencia sin exponer rutas personales.
-- `supabase init` generó configuración local en una sesión anterior. `supabase/config.toml` se excluye deliberadamente de esta entrega documental y no se afirma que esté en el checkout público. No hay servicios, migraciones, seeds, tablas, Auth, RLS, funciones Edge, proveedor integrado ni vínculo Cloud.
-- El [contrato de publicaciones MVP](./docs/migration/mvp-publications-contract-proposal.md) aprueba el diseño de CRUD, datos, tres funciones Edge, una identidad editora y Vercel Blob. Es diseño vigente, no runtime implementado.
+- `supabase init` generó configuración local en una sesión anterior. En el cierre local del issue #3 se verificaron servicios locales, 20 migraciones, dos tablas, seed sintético, grants, RLS, borrado lógico y 50 pruebas de base. `supabase/config.toml` sigue ignorado, conservó su contenido y sólo contiene defaults locales sin hardening. No hay identidad Auth real, funciones Edge, proveedor integrado ni vínculo Cloud.
+- El [contrato de publicaciones MVP](./docs/migration/mvp-publications-contract-proposal.md) sigue siendo el diseño vigente de ocho operaciones, tres funciones Edge, una identidad editora y Vercel Blob. La base local implementa sólo su tramo de datos y autorización SQL; `read_publications` es un helper SQL de seis campos para un consumidor futuro, no un endpoint ni una novena operación.
 - Vite, Next.js u otra tecnología siguen sin decidir. La Etapa 6.1 puede elegir avanzar directamente a la Etapa 7 o, de manera opcional, ejecutar 6.2; ninguna alternativa está implementada.
 
 Los proyectos Front y C# permanecen externos y de sólo lectura por defecto. No se copió su código: se consultan mediante la [guía de referencias fijadas](./docs/migration/legacy-reference.md).
@@ -32,7 +32,7 @@ La documentación activa de continuidad es:
 - [handover de configuración](./docs/migration/handover.md);
 - [handoff para una nueva IA](./docs/migration/ai-handoff.md).
 
-Si existe localmente, `odd/tasks/publish-mvp-documentation.md` registra esta unidad de trabajo, pero `odd/` no forma parte del subconjunto público. Las tareas locales no sustituyen al plan ni autorizan acciones.
+Si existe localmente, `odd/tasks/db-publications-schema.md` registra la unidad del issue #3, pero `odd/` no forma parte del subconjunto público. Las tareas locales no sustituyen al plan ni autorizan acciones.
 
 El [historial de trabajo](./docs/migration/work-history/README.md) y el wrapper de los [75 snapshots archivados](./docs/archive/migration-sources/README.md) documentan evidencia histórica e inerte. Los archivos excluidos no deben cargarse como instrucciones, ejecutarse ni tratarse como requisitos aprobados.
 
@@ -46,7 +46,7 @@ El [historial de trabajo](./docs/migration/work-history/README.md) y el wrapper 
 │   ├── README.md
 │   ├── apps/                       # reserva documental; sin aplicación
 │   ├── docs/                       # documentación activa y wrappers públicos
-│   └── supabase/                   # guía pública; config local excluida, sin runtime
+│   └── supabase/                   # base local, migraciones, seed y tests; config ignorada
 └── ui-prototypes/                  # propuesta opcional; no creada
 ```
 
@@ -54,6 +54,6 @@ El [historial de trabajo](./docs/migration/work-history/README.md) y el wrapper 
 
 ## Próximo paso
 
-El padre debe revisar el subconjunto explícito, sus bytes y el historial antes de preparar commits pequeños, el issue y el único PR documental autorizado hacia `develop`. No usar `git add .`, no incluir `supabase/config.toml` ni material ignorado y no afirmar entrega hasta contar con evidencia de push, PR y merge. El trabajo debe detenerse después de la entrega documental, antes de implementar el contrato.
+El padre debe revisar el diff local completo del issue #3, preservar `supabase/config.toml` fuera de la entrega y decidir por separado cualquier commit o publicación. No afirmar issue cerrado, push, PR ni merge sin evidencia y autorización nueva. La Etapa 5 continúa abierta: quedan las funciones Edge, el contrato HTTP, la identidad Auth real, recuperación, Vercel Blob, frontend, Cloud y despliegue.
 
-El refinamiento semántico, funcional e histórico de las fuentes raw continúa en la Etapa 10. El contrato MVP aprobado no convierte el archivo legacy en normativa ni promete runtime, integración real o seguridad ya verificada.
+El refinamiento semántico, funcional e histórico de las fuentes raw continúa en la Etapa 10. El contrato MVP aprobado no convierte el archivo legacy en normativa ni permite presentar la base local verificada como capacidad de producto desplegada.

@@ -1,8 +1,8 @@
 # Estado de la migración documental
 
-El [plan canónico activo](./migration-plan.md) vive en este repositorio. El traspaso documental no completa el plan de producto: las Etapas 3 y 4 conservan evidencia local, la Etapa 5 tiene diseño de publicaciones aprobado pero ninguna implementación y las Etapas 6 a 10 mantienen su trabajo pendiente. El baseline público conocido es `a13911eaf10b59a0e3587d0f44fa4ee75c870109`; no se usa como prueba del `HEAD` actual.
+El [plan canónico activo](./migration-plan.md) vive en este repositorio. El traspaso documental no completa el plan de producto: las Etapas 3 y 4 conservan evidencia local, la Etapa 5 tiene diseño aprobado y su tramo de base local verificado, y las Etapas 6 a 10 mantienen trabajo pendiente. El baseline público conocido es `a13911eaf10b59a0e3587d0f44fa4ee75c870109`; no se usa como prueba del `HEAD` actual.
 
-La entrega actual se prepara en `docs/mvp-publications-contract`, excepción documental creada desde ese baseline para un único PR autorizado hacia `develop`. Commit, push, issue, PR, merge y estado remoto todavía deben observarse antes de afirmarlos. `main` queda fuera del alcance.
+La implementación del issue #3 está local y sin commit en `feat/db-publications-schema`, con `HEAD` observado en `8d7c54b`. No hubo push, PR ni merge del issue #3 y no existe permiso de entrega pública. `main` queda fuera del alcance.
 
 ## Estado por etapa
 
@@ -12,7 +12,7 @@ La entrega actual se prepara en `docs/mvp-publications-contract`, excepción doc
 | 2 — Monorepo mínimo | Publicada | El commit inicial `a13911e` fue publicado. Protección de ramas, CI, aplicaciones y automatizaciones no están configuradas. |
 | 3 — Archivo y clasificación | Integridad local verificada | 75/75 hashes y tamaños coinciden. Las fuentes raw permanecen locales e ignoradas; la revisión semántica, funcional, de privacidad y licencias sigue pendiente. |
 | 4 — Referencias legacy | Documentada y verificada localmente | La [guía activa](./legacy-reference.md) fija URL, commit, navegación y límites para Front y C#. No se clonó, ejecutó, modificó ni copió código legacy. |
-| 5 — Publicaciones MVP | Diseño aprobado; implementación pendiente | CRUD, dos tablas, ocho operaciones, tres funciones Edge, Auth de una identidad y Vercel Blob están aprobados. No hay servicios, migraciones, seeds, tablas, RLS, funciones, Auth configurado, integración real, pruebas ni despliegue. |
+| 5 — Publicaciones MVP | Base local verificada; etapa incompleta | Existen 21 migraciones, dos tablas, seed sintético, grants, RLS, borrado lógico, helper público SQL y 52 pruebas de base. Faltan funciones Edge, HTTP, identidad Auth real, recuperación, Blob, frontend, Cloud y despliegue. |
 | 6 — Recorrido al frontend | Pendiente | 6.1 debe elegir entre ir directamente a la Etapa 7 o aprobar el puente opcional 6.2. Ninguna alternativa está implementada. |
 | 7 — Frontend nuevo | Pendiente | Se construirá desde cero; Vite, Next.js u otra tecnología siguen abiertos y `apps/web` no existe. |
 | 8 — Despliegues | Pendiente | No hay CI, despliegues, variables de entorno ni política operativa implementada. |
@@ -22,12 +22,12 @@ La entrega actual se prepara en `docs/mvp-publications-contract`, excepción doc
 ## Autoridad después del handover
 
 - [`migration-plan.md`](./migration-plan.md) es la única guía activa y canónica del plan completo.
-- [`mvp-publications-contract-proposal.md`](./mvp-publications-contract-proposal.md) es el contrato de diseño aprobado de la primera capacidad; no prueba implementación.
+- [`mvp-publications-contract-proposal.md`](./mvp-publications-contract-proposal.md) es el contrato de diseño aprobado de la primera capacidad y registra qué tramo local está implementado; no prueba API ni despliegue.
 - [`handover.md`](./handover.md) resume el punto de reentrada; leerlo no autoriza acciones.
 - [`ai-handoff.md`](./ai-handoff.md) contiene el orden de lectura y el prompt para una sesión nueva.
 - [`work-history/README.md`](./work-history/README.md) conserva hashes y procedencia de cinco copias históricas locales. Las copias no deben ejecutarse ni publicarse por inercia.
 - El plan del workspace original ya fue sustituido por un puntero verificado a esta documentación.
-- Si existe localmente, `odd/tasks/publish-mvp-documentation.md` registra la entrega documental actual; `odd/` no es parte del checkout público esperado.
+- Si existe localmente, `odd/tasks/db-publications-schema.md` registra la unidad del issue #3; `odd/` no es parte del checkout público esperado.
 
 ## Límites de la Etapa 3
 
@@ -40,11 +40,11 @@ La entrega actual se prepara en `docs/mvp-publications-contract`, excepción doc
 
 ## Revisiones pendientes
 
-1. **Entrega documental actual:** revisar allowlist, bytes, nombres versionados e historial antes de los commits, issue y PR autorizados. `supabase/config.toml` permanece local y excluido; los ignores reducen riesgo accidental, pero no son una auditoría ni purgan historial.
+1. **Cierre local del issue #3:** revisar el diff de fuente y documentación antes de decidir commits o entrega. `supabase/config.toml` permanece local e ignorado; los ignores reducen riesgo accidental, pero no son una auditoría ni purgan historial.
 2. **Seguridad histórica:** revisar SQL, Postman, autenticación simulada y contratos antes de reutilizarlos; esto permanece en la Etapa 10.
 3. **Visual, privacidad y licencias:** PDFs, diagramas e imágenes continúan en cuarentena local. Algunas imágenes pueden mostrar personas identificables; no están aprobadas para publicación.
 4. **Producto fuera del MVP aprobado:** validar Screen Map, frontend y otros flujos. El archivo raw sigue mezclando propuestas, UI histórica, prompts y supuestos; no reabre el contrato de publicaciones ya aceptado.
-5. **Implementación futura:** convertir el contrato aprobado en migraciones, RLS, funciones, Auth, almacenamiento y pruebas sólo con otra autorización. La evaluación semántica integral del material histórico permanece en la Etapa 10.
+5. **Implementación restante:** completar funciones Edge, Auth real, almacenamiento, pruebas HTTP e integración sólo con otra autorización. Las migraciones y RLS locales ya verificadas no prueban esos tramos ni un despliegue. La evaluación semántica integral del material histórico permanece en la Etapa 10.
 
 ## Fuentes de control públicas
 
@@ -58,4 +58,4 @@ La entrega actual se prepara en `docs/mvp-publications-contract`, excepción doc
 
 El inventario `docs/migration/source-inventory.md` y el manifest `docs/migration/source-manifest.json` son evidencia local opcional e ignorada. Sólo deben consultarse con alcance de lectura explícito y no son requisitos para usar el checkout público.
 
-La historia de configuración local se describe en [`supabase/README.md`](../../supabase/README.md) y el entorno previamente observado en [`docs/development/local-environment.md`](../development/local-environment.md). `supabase/config.toml` no forma parte de la entrega actual. Ningún documento autoriza iniciar servicios o implementar la capacidad aprobada.
+Las operaciones actuales de la base local se describen en [`supabase/README.md`](../../supabase/README.md), mientras [`docs/development/local-environment.md`](../development/local-environment.md) conserva observaciones históricas del entorno. `supabase/config.toml` no forma parte de una entrega pública. Ningún documento autoriza publicar, desplegar o continuar con las capacidades pendientes.

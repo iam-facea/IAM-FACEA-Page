@@ -1,6 +1,6 @@
 # Arquitectura inicial
 
-La arquitectura actual sigue siendo documental: existe un diseño aprobado para publicaciones MVP, pero no hay runtime. Separa el producto nuevo de los repositorios legados y distingue las decisiones aceptadas de toda implementación futura.
+La arquitectura del producto sigue sin runtime de aplicación, pero ya no es exclusivamente documental: existe una implementación verificada de la base local de publicaciones. El diseño aprobado conserva alcance mayor que ese tramo SQL. Este mapa separa el producto nuevo de los repositorios legados y distingue diseño, implementación local y capacidades futuras.
 
 ## Mapa actual
 
@@ -10,7 +10,7 @@ Contenedor local sin Git
     ├── documentación activa y glosario
     ├── archivo documental no normativo de la Etapa 3
     ├── apps/ (reserva documental, sin aplicación)
-    └── supabase/ (guía pública; config local excluida, sin servicios ni esquema aplicado)
+    └── supabase/ (20 migraciones, seed y pruebas de base; config local ignorada)
 
 Workspace legado original (externo, sólo lectura)
 ├── Front
@@ -25,9 +25,9 @@ No se trasladan automáticamente código, historial, datos ni decisiones desde e
 |---|---|---|
 | Web | No creada | Evaluar Vite y Next.js antes de crear `apps/web`. |
 | Referencia actual | Externa | Considerar `apps/web-current` sólo ante una necesidad aceptada. |
-| Datos y backend | Diseño de publicaciones aprobado; servicios, migraciones, tablas, RLS y funciones no creados | Implementar después de una autorización separada el esquema y tres funciones Edge del contrato. |
+| Datos y backend | Base local verificada: dos tablas, grants, RLS, seed, borrado lógico y helper público SQL; sin endpoint HTTP | Implementar las tres funciones Edge, Auth real y Blob sin ampliar las ocho operaciones aprobadas. |
 | CI y despliegue | No configurados | Diseñar por aplicación cuando existan comandos reales. |
-| GitHub | Repositorio y baseline `a13911e` publicados históricamente | La rama documental actual prepara un único PR autorizado hacia `develop`; commit, push, PR y merge todavía requieren evidencia. |
+| GitHub | Baseline `a13911e` publicado; issue #3 local en `feat/db-publications-schema` sobre `8d7c54b` | Revisar el diff local; commit, push, PR y merge requieren autorización nueva y evidencia. |
 
 ## Límites operativos
 
@@ -35,13 +35,13 @@ Las aplicaciones se podrán desplegar independientemente. Un despliegue no debe 
 
 La autorización se garantiza en el servidor y/o con políticas RLS. La visibilidad de un botón o una ruta en la interfaz no concede ni revoca acceso. Las credenciales privilegiadas permanecen del lado servidor: una clave `service_role` nunca puede exponerse con prefijos públicos como `VITE_` o `NEXT_PUBLIC_`.
 
-La [guía de Supabase](../../supabase/README.md) registra que la CLI 2.122.0 generó configuración en una sesión anterior. `supabase/config.toml` permanece local y se excluye deliberadamente de la entrega documental actual; no se iniciaron servicios ni se crearon migraciones, tablas, seeds o vínculos Cloud.
+La [guía de Supabase](../../supabase/README.md) separa dos momentos. Históricamente, la CLI 2.122.0 sólo había generado configuración. En la implementación local del issue #3 se reconstruyeron 20 migraciones y un seed sintético con servicios locales; `supabase test db` pasó 5 archivos y 50 pruebas, y `supabase db lint --local --level warning` no informó errores ni advertencias. `supabase/config.toml` permanece local, ignorado y sin hardening; no existe vínculo Cloud.
 
-El [contrato de publicaciones MVP](../migration/mvp-publications-contract-proposal.md) aprueba dos tablas, ocho operaciones y tres funciones Edge: `publications` para lectura pública, `editor-publications` para CRUD editorial e `images` para carga. Las funciones se organizan en módulos funcionales pequeños, sin cadenas redundantes controller/service/repository. Un adaptador de almacenamiento sí constituye una frontera real: producción usará Vercel Blob y las pruebas un adaptador local o fake.
+El [contrato de publicaciones MVP](../migration/mvp-publications-contract-proposal.md) aprueba dos tablas, ocho operaciones y tres funciones Edge: `publications` para lectura pública, `editor-publications` para CRUD editorial e `images` para carga. La base implementa `read_publications` como helper SQL público, acotado a la proyección de seis campos y paginación aprobadas; no es una función Edge, un endpoint ni una novena operación. Las futuras funciones se organizarán en módulos funcionales pequeños, sin cadenas redundantes controller/service/repository. Un adaptador de almacenamiento sí constituye una frontera real: producción usará Vercel Blob y las pruebas un adaptador local o fake.
 
-La función pública es anónima y depende de RLS para limitar la lectura. Las funciones editoriales deben autenticar y además autorizar el subject exacto de la única identidad editora. Supabase Auth con email y contraseña, ausencia de signup, recuperación requerida, políticas RLS, Vercel Blob y URLs públicas son decisiones aprobadas, pero nada está configurado o verificado contra servicios reales.
+La lectura SQL pública permite sólo filas `published` no eliminadas y no concede acceso directo a las tablas. La configuración privada editora conserva `editor_subject = NULL`, por lo que las políticas y la operación de borrado lógico fallan cerradas hasta provisionar una identidad real; las pruebas usan identidades sintéticas transaccionales y rollback. Supabase Auth con email y contraseña, ausencia de signup, recuperación requerida, Vercel Blob y URLs públicas siguen siendo decisiones aprobadas sin implementación de servicio real. Los defaults locales generados no prueban signup deshabilitado ni preparación para producción.
 
-El legado conserva valor como evidencia histórica, no como modelo a copiar. El próximo paso de esta unidad es entregar la documentación y detenerse antes de la implementación; iniciar Supabase, integrar proveedores o considerar Cloud requiere autorización posterior.
+El legado conserva valor como evidencia histórica, no como modelo a copiar. El próximo paso es revisar y cerrar localmente el tramo de base del issue #3 sin afirmar entrega pública. Implementar funciones Edge, provisionar Auth, integrar proveedores o considerar Cloud requiere un alcance y una autorización posteriores.
 
 ## Decisiones relacionadas
 

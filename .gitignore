@@ -27,5 +27,24 @@ Thumbs.db
 **/supabase/.temp/
 **/supabase/.branches/
 
-# Se versionan deliberadamente lockfiles, documentación, SQL, migraciones,
-# configuración de Supabase y semillas sintéticas. No ignorar .pi/ completo.
+# Entrega documental actual: la configuración generada permanece local
+/supabase/config.toml
+
+# Claves privadas locales
+*.pem
+*.key
+
+# Evidencia histórica y coordinación local no publicable
+/docs/archive/migration-sources/*
+!/docs/archive/migration-sources/README.md
+/docs/migration/work-history/*
+!/docs/migration/work-history/README.md
+/docs/migration/source-inventory.md
+/docs/migration/source-manifest.json
+/odd/
+
+# Estas reglas sólo excluyen archivos no seguidos. No auditan contenido,
+# no eliminan archivos ya versionados ni purgan el historial de Git.
+# En esta entrega se publica documentación activa; excluir config.toml es
+# una decisión del alcance actual, no una política permanente para futuros cambios.
+# No ignorar .pi/ completo.

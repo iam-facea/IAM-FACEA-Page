@@ -1,6 +1,6 @@
 # Supabase local database operations
 
-The local database currently has 22 ordered migrations for the publication schema, access controls, soft deletion, and Edge Function service-role RPCs. `supabase/seed.sql` adds three synthetic development fixtures after a local reconstruction. The `images` Edge Function is implemented locally and tested against the database schema and storage adapters. No real editor identity, email provisioning, signup, or recovery flow is implemented.
+The local database currently has 22 ordered migrations for the publication schema, access controls, soft deletion, and Edge Function service-role RPCs. `supabase/seed.sql` adds three synthetic development fixtures after a local reconstruction. All three Edge Functions (`images`, `publications`, `editor-publications`) implementing the 8 approved contract actions are implemented locally and verified via unit and HTTP integration tests. No real editor identity, email provisioning, signup, or recovery flow is implemented.
 
 ## Rebuild the local database
 
@@ -75,13 +75,24 @@ This update configures one exact subject only. It does not create an Auth user, 
 
 ## Edge Functions and image storage
 
-The repository includes the `images` Edge Function (`POST /functions/v1/images`), image validation rules, and decoupled storage adapters under `supabase/functions/`:
+The repository implements all three Edge Functions under `supabase/functions/` covering the 8 approved MVP actions:
 
 - `_shared/storage.ts`: `StorageAdapter` interface (`store` and `delete`).
 - `_shared/memory_storage_adapter.ts`: deterministic in-memory storage adapter for zero-network testing.
 - `_shared/vercel_blob_storage_adapter.ts`: production server-side Vercel Blob adapter using `BLOB_READ_WRITE_TOKEN`.
 - `_shared/image_validator.ts`: validates multipart images by inspecting magic bytes (JPEG `FF D8 FF`, PNG `89 50 4E 47`, WebP `RIFF...WEBP`), enforcing a strict 5 MiB size limit, and parsing image headers to enforce maximum 4096×4096 dimensions.
-- `images/handler.ts` & `images/index.ts`: HTTP handler enforcing exact editor session authorization, multipart format, storage upload, insertion into `public.content`, and compensatory storage deletion on database failure.
+- `_shared/cursor.ts`: Base64url unpadded versioned keyset cursor codec for public `(publicationDate, id)` and editorial `(updatedAt, id)` tuples.
+- `_shared/publication_validator.ts`: strict validators for limits (1..50, default 20), UUIDs, `PublicationCreate`, and `PublicationReplace`.
+- `images/`: Action 8 (`POST /functions/v1/images`), multipart upload, exact editor session authorization, storage upload, insertion into `public.content`, and compensatory storage deletion on database failure.
+- `publications/`: Public endpoints without session:
+  - Action 1: `GET /functions/v1/publications` (keyset pagination, default 20, max 50, nextCursor).
+  - Action 2: `GET /functions/v1/publications/{id}` (6-field public projection, 404 for draft/deleted/nonexistent).
+- `editor-publications/`: Editorial endpoints requiring valid session matching `get_editor_subject()`:
+  - Action 3: `GET /functions/v1/editor-publications` (keyset pagination by `(updatedAt, id)`, both draft/published, no deleted).
+  - Action 4: `GET /functions/v1/editor-publications/{id}` (full editorial projection with `image.id`).
+  - Action 5: `POST /functions/v1/editor-publications` (creates draft, checks image availability, sets Argentine date default, returns 201 + `Location`).
+  - Action 6: `PUT /functions/v1/editor-publications/{id}` (full replacement, checks image reassignment, returns 200).
+  - Action 7: `DELETE /functions/v1/editor-publications/{id}` (idempotent soft deletion, returns 204 No Content).
 
 ### Run Edge Function tests
 
@@ -94,8 +105,7 @@ MSYS_NO_PATHCONV=1 docker run --rm -v "C:/000 MIS COSAS NUEVAS/00 REPOS/iam-face
 ## Current limits
 
 - The database schema, RLS, grants, bounded public read function, soft-delete gate, tests, and local synthetic seed exist.
-- The `images` Edge Function and storage adapters are implemented and verified via unit and HTTP integration tests.
-- The two publication Edge Functions (`publications` and `editor-publications`) remain pending for Issue #5.
+- All three approved Edge Functions (`publications`, `editor-publications`, `images`) covering the 8 actions are implemented and verified via unit and HTTP integration tests.
 - Vercel Blob production credentials remain unconfigured; production uses the verified server adapter once provisioned.
 - These instructions neither link nor operate a Supabase Cloud project.
 - No real editor identity, secret, privileged client key, or `auth.users` seed account is included.

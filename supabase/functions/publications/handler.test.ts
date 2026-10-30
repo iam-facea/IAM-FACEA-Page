@@ -310,3 +310,21 @@ Deno.test("public publications RPC client posts mapped parameters with the anon 
     },
   );
 });
+
+Deno.test("public publications handler responds to OPTIONS preflight and attaches CORS headers", async () => {
+  const harness = createHarness();
+  const preflightResponse = await harness.handler(
+    request("/functions/v1/publications", "OPTIONS"),
+  );
+
+  assertEquals(preflightResponse.status, 200);
+  assertEquals(preflightResponse.headers.get("access-control-allow-origin"), "*");
+  assertEquals(
+    preflightResponse.headers.get("access-control-allow-headers"),
+    "authorization, x-client-info, apikey, content-type",
+  );
+
+  const getResponse = await harness.handler(request("/functions/v1/publications"));
+  assertEquals(getResponse.headers.get("access-control-allow-origin"), "*");
+});
+

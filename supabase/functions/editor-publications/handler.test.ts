@@ -621,3 +621,24 @@ Deno.test("Supabase editor client verifies image availability and requests the i
     "Expected the inserted representation to include its image",
   );
 });
+
+Deno.test("editor publications handler responds to OPTIONS preflight and attaches CORS headers", async () => {
+  const harness = createHarness();
+  const preflightResponse = await harness.handler(
+    request("/functions/v1/editor-publications", { method: "OPTIONS" }),
+  );
+
+  assertEquals(preflightResponse.status, 200);
+  assertEquals(preflightResponse.headers.get("access-control-allow-origin"), "*");
+  assertEquals(
+    preflightResponse.headers.get("access-control-allow-headers"),
+    "authorization, x-client-info, apikey, content-type",
+  );
+
+  const unauthResponse = await harness.handler(
+    request("/functions/v1/editor-publications", { method: "GET" }, false),
+  );
+  assertEquals(unauthResponse.status, 401);
+  assertEquals(unauthResponse.headers.get("access-control-allow-origin"), "*");
+});
+

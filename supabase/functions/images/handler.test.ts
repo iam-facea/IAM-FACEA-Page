@@ -309,3 +309,24 @@ Deno.test("images handler returns 500 when storage upload fails without insertin
   assertEquals(harness.inserted.length, 0);
   assertEquals(harness.deleted.length, 0);
 });
+
+Deno.test("images handler responds to OPTIONS preflight and attaches CORS headers", async () => {
+  const harness = createHarness();
+  const preflightResponse = await harness.handler(
+    new Request("http://localhost/functions/v1/images", { method: "OPTIONS" }),
+  );
+
+  assertEquals(preflightResponse.status, 200);
+  assertEquals(preflightResponse.headers.get("access-control-allow-origin"), "*");
+  assertEquals(
+    preflightResponse.headers.get("access-control-allow-headers"),
+    "authorization, x-client-info, apikey, content-type",
+  );
+
+  const unauthResponse = await harness.handler(
+    new Request("http://localhost/functions/v1/images", { method: "POST" }),
+  );
+  assertEquals(unauthResponse.status, 401);
+  assertEquals(unauthResponse.headers.get("access-control-allow-origin"), "*");
+});
+

@@ -1,4 +1,8 @@
 import {
+  handleCorsPreflight,
+  withCors,
+} from "../_shared/cors.ts";
+import {
   decodePublicCursor,
   encodePublicCursor,
 } from "../_shared/cursor.ts";
@@ -43,20 +47,25 @@ export function createPublicPublicationsHandler(
   deps: PublicPublicationsHandlerDependencies,
 ): (request: Request) => Promise<Response> {
   return async (request: Request): Promise<Response> => {
+    const preflight = handleCorsPreflight(request);
+    if (preflight !== null) {
+      return preflight;
+    }
+
     if (request.method !== "GET") {
-      return jsonError(405, "Method not allowed", { Allow: "GET" });
+      return withCors(jsonError(405, "Method not allowed", { Allow: "GET" }));
     }
 
     const route = parseRoute(new URL(request.url).pathname);
     if (route === null) {
-      return jsonError(404, "Not found");
+      return withCors(jsonError(404, "Not found"));
     }
 
-    if (route.id !== null) {
-      return handleDetail(route.id, deps.db);
-    }
+    const response = route.id !== null
+      ? await handleDetail(route.id, deps.db)
+      : await handleList(new URL(request.url), deps.db);
 
-    return handleList(new URL(request.url), deps.db);
+    return withCors(response);
   };
 }
 

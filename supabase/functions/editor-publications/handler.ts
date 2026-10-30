@@ -1,4 +1,8 @@
 import {
+  handleCorsPreflight,
+  withCors,
+} from "../_shared/cors.ts";
+import {
   decodeEditorCursor,
   encodeEditorCursor,
 } from "../_shared/cursor.ts";
@@ -87,21 +91,26 @@ export function createEditorPublicationsHandler(
   const now = deps.now ?? (() => new Date());
 
   return async (request: Request): Promise<Response> => {
+    const preflight = handleCorsPreflight(request);
+    if (preflight !== null) {
+      return preflight;
+    }
+
     const url = new URL(request.url);
     const route = parseRoute(url.pathname);
     if (route === null) {
-      return jsonError(404, "Not found");
+      return withCors(jsonError(404, "Not found"));
     }
 
     if (!route.allowedMethods.includes(request.method)) {
-      return jsonError(405, "Method not allowed", {
+      return withCors(jsonError(405, "Method not allowed", {
         Allow: route.allowedMethods.join(", "),
-      });
+      }));
     }
 
     const authorization = request.headers.get("Authorization");
     if (authorization === null || authorization.trim() === "") {
-      return jsonError(401, "Authentication required");
+      return withCors(jsonError(401, "Authentication required"));
     }
 
     try {
@@ -109,33 +118,37 @@ export function createEditorPublicationsHandler(
         authorization.trim(),
       );
       if (authenticatedSubject === null) {
-        return jsonError(401, "Authentication required");
+        return withCors(jsonError(401, "Authentication required"));
       }
 
       const editorSubject = await deps.db.getEditorSubject();
       if (
         editorSubject === null || authenticatedSubject !== editorSubject
       ) {
-        return jsonError(403, "Forbidden");
+        return withCors(jsonError(403, "Forbidden"));
       }
     } catch {
-      return jsonError(500, "Internal server error");
+      return withCors(jsonError(500, "Internal server error"));
     }
 
+    let response: Response;
     if (route.id === null) {
       if (request.method === "GET") {
-        return handleList(url, deps.db);
+        response = await handleList(url, deps.db);
+      } else {
+        response = await handleCreate(request, deps.db, now);
       }
-      return handleCreate(request, deps.db, now);
+    } else {
+      if (request.method === "GET") {
+        response = await handleDetail(route.id, deps.db);
+      } else if (request.method === "PUT") {
+        response = await handleReplace(route.id, request, deps.db);
+      } else {
+        response = await handleDelete(route.id, deps.db);
+      }
     }
 
-    if (request.method === "GET") {
-      return handleDetail(route.id, deps.db);
-    }
-    if (request.method === "PUT") {
-      return handleReplace(route.id, request, deps.db);
-    }
-    return handleDelete(route.id, deps.db);
+    return withCors(response);
   };
 }
 

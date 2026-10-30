@@ -1,4 +1,8 @@
 import {
+  handleCorsPreflight,
+  withCors,
+} from "../_shared/cors.ts";
+import {
   ImageValidationError,
   validateImage,
 } from "../_shared/image_validator.ts";
@@ -22,7 +26,7 @@ export interface ImagesHandlerDependencies {
 export function createImagesHandler(
   deps: ImagesHandlerDependencies,
 ): (req: Request) => Promise<Response> {
-  return async (req: Request): Promise<Response> => {
+  const handler = async (req: Request): Promise<Response> => {
     if (req.method !== "POST") {
       return jsonError(405, "Method not allowed", { Allow: "POST" });
     }
@@ -112,6 +116,15 @@ export function createImagesHandler(
       }
       return jsonError(500, "Internal server error");
     }
+  };
+
+  return async (req: Request): Promise<Response> => {
+    const preflight = handleCorsPreflight(req);
+    if (preflight !== null) {
+      return preflight;
+    }
+    const response = await handler(req);
+    return withCors(response);
   };
 }
 
